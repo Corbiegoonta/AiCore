@@ -37,6 +37,7 @@ class Scraper():
                         'Champion_Rank' : [],
                         'Champion_Rank_Movement' : [],
                         'Champion_Page_Link' : [],
+                        'Patch' : [],
                         'UUID' : []
         }
         pass
@@ -48,10 +49,10 @@ class Scraper():
 
     def bypass_cookies(self):
         try:
-            time.sleep(2)
-            button_continer = self.driver.find_element(By.XPATH, '//div[@class="qc-cmp2-summary-buttons"]')
+            time.sleep(10)
+            button_continer = WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, '//div[@class="qc-cmp2-summary-buttons"]')))
             buttons = button_continer.find_elements(By.XPATH, './button')
-            accept_cookies_button = buttons[0]
+            accept_cookies_button = buttons[1]
             accept_cookies_button.click()
         except Exception:
             print("No cookies found.")
@@ -74,21 +75,26 @@ class Scraper():
         pass
     
     def switch_region_to_global(self):
-        region_button_container = self.driver.find_element(By.XPATH, '//div[@class="css-1dgy7lj e5qh6tw1"]')
-        region_buttton_whole = region_button_container.find_element(By.XPATH, './div')
-        region_buttton_whole1 = region_buttton_whole.find_element(By.XPATH, './button')
-        region_buttton_whole1.click()
-        time.sleep(2)
-        global_button = self.driver.find_element(By.XPATH, '//button[@class="region_filter css-1mye3k2 e5qh6tw0"]')
-        global_button.click()
-        print("region switched!")
+        try:
+            region_button_container = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//div[@class="css-1dgy7lj e5qh6tw1"]')))
+            region_buttton_whole = region_button_container.find_element(By.XPATH, './div')
+            region_buttton_whole1 = region_buttton_whole.find_element(By.XPATH, './button')
+            region_buttton_whole1.click()
+            time.sleep(2)
+            global_button = self.driver.find_element(By.XPATH, '//button[@class="region_filter css-1mye3k2 e5qh6tw0"]')
+            global_button.click()
+            print("region switched!")
+        except Exception:
+            self.driver.refresh()
+            self.get_latest_page()
+            self.bypass_cookies()
         pass
 
     def switch_rank_to_all(self):
-        rank_button_container = self.driver.find_element(By.XPATH, '//div[@class="css-w4h7ss e5qh6tw1"]')
+        rank_button_container = self.driver.find_element(By.XPATH, '//div[@class="css-1irfcct e5qh6tw1"]')
         rank_button_container.click()
         time.sleep(2)
-        global_button = self.driver.find_element(By.XPATH, '//button[@class="css-1r5lhmi e5qh6tw0"]')
+        global_button = self.driver.find_element(By.XPATH, '//button[@class="css-16v6t24 e5qh6tw0"]')
         global_button.click()
         print("rank switched!")
         pass
@@ -118,6 +124,12 @@ class Scraper():
         champion_rows = body_contianer.find_elements(By.XPATH, './tr')
         return champion_rows
 
+    def get_patch(self):
+        patch_button_container = self.driver.find_element(By.XPATH, '//button[@class="css-ee3hyw e5qh6tw2"]')
+        patch = patch_button_container.text
+        print(patch)
+        return patch
+
     def get_champion_info(self):
         lanes_container = self.driver.find_element(By.XPATH, '//nav[@class="css-1wrsp9i e14ouzjd5"]')
         lanes = lanes_container.find_elements(By.XPATH, './button')
@@ -131,6 +143,8 @@ class Scraper():
             all_champion_rows = self.get_champion_rows()
             number = 0
             for j in all_champion_rows:
+                patch = self.get_patch()
+                self.display_dict['Patch'].append(patch)
                 self.display_dict['Lane'].append(lanes[i].text)
                 champion_info_columns = j.find_elements(By.XPATH, './td')
                 rank_and_movement = champion_info_columns[0].find_elements(By.XPATH, './span')
@@ -159,9 +173,12 @@ class Scraper():
                 self.display_dict['Champion_Counters'].append(champion_counter_list)
         dict_counter = 0
         for l in self.display_dict['Champion_Name']:
-            self.get_champion_page(l)
-            self.get_images(self.display_dict['Champion_Page_Link'][dict_counter])
-            dict_counter += 1
+            try:
+                self.get_champion_page(l)
+                self.get_images(self.display_dict['Champion_Page_Link'][dict_counter], l)
+                dict_counter += 1
+            except Exception:
+                print("no pic")
         print(self.display_dict['Lane'])
         print(len((self.display_dict['Lane'])))
         print(self.display_dict['Champion_Rank'])
@@ -182,6 +199,8 @@ class Scraper():
         print(len(self.display_dict['Champion_Counters']))
         print(self.display_dict['Champion_Page_Link'])
         print(len(self.display_dict['Champion_Page_Link']))
+        print(self.display_dict['Patch'])
+        print(len((self.display_dict['Patch'])))
         print(number)
         pass
 
@@ -206,7 +225,7 @@ class Scraper():
             print(champion_name)
         elif champion_name == 'renata glasc':
             champion_name = 'renata'
-            print(champion_name)
+            print(champion_name) 
         else:
             champion_name = list(champion_name)
             print(champion_name)
@@ -234,13 +253,21 @@ class Scraper():
             champion_image.write(image)
         pass
 
-    def get_images(self, url):
-        urllib.request.urlopen(Request(url, headers={'User-Agent': 'Mozilla'}))
+    def get_images(self, url, champion_name):
+        urllib.request.urlretrieve(url, rf'C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Images\{champion_name}.jpg')
         pass
 
     def accept_lol_page_cookies(self):
         try:
             time.sleep(2)
+            accept_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//button[@class="osano-cm-accept-all osano-cm-buttons__button osano-cm-button osano-cm-button--type_accept"]')))
+            accept_button.click()
+        except Exception:
+            print("No cookies found.")
+        pass
+
+    def accept_lol_pic_page_cookies(self):
+        try:
             accept_button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//button[@class="osano-cm-accept-all osano-cm-buttons__button osano-cm-button osano-cm-button--type_accept"]')))
             accept_button.click()
         except Exception:
