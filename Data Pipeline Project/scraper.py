@@ -249,9 +249,6 @@ class Scraper():
         image_tag = image_contianer.find_element_by_tag_name('img')
         image_link = image_tag.get_attribute('src')
         self.display_dict['Champion_Page_Link'].append(image_link)
-        # image = requests.get(image_link).content
-        # with open(f'{champion}.jpg', 'wb') as champion_image:
-        #     champion_image.write(image)
         pass
 
     def get_images(self, url, champion_name):
