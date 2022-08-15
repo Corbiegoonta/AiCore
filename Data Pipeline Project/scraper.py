@@ -16,6 +16,9 @@ import pandas as pd
 import json
 import urllib.request
 from urllib.request import urlopen, Request
+import boto3
+from botocore.exceptions import ClientError
+import os
 
 url = 'https://www.op.gg/'
 
@@ -250,9 +253,19 @@ class Scraper():
         image_link = image_tag.get_attribute('src')
         self.display_dict['Champion_Page_Link'].append(image_link)
         pass
+    
+    def create_folder(self, folder_name='\Champion Info', parent_directory="C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project"):
+        try:
+            path = os.path.join(parent_directory, folder_name)
+            os.mkdir(path)
+            print("Directory created.")
+            print(path)
+        except Exception:
+            print("This directory already exists.")
+        pass
 
     def get_images(self, url, champion_name):
-        urllib.request.urlretrieve(url, rf'C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Images\{champion_name}.jpg')
+        urllib.request.urlretrieve(url, rf'C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Info\{champion_name}.jpg')
         pass
 
     def accept_lol_page_cookies(self):
@@ -273,8 +286,28 @@ class Scraper():
         pass
 
     def create_json_file(self):
-        with open('champion_info.json', 'w') as raw_data_file:
+        with open('C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Info'.format('champion_info.json'), 'w') as raw_data_file:
             json.dump(json.dumps(self.display_dict, indent = 4), raw_data_file)
+
+    def create_s3_bucket(self, bucket_name='lolchampiondata', region='eu-west-2'):
+        try:
+            s3_client = boto3.client('s3')
+            s3_client.create_bucket(Bucket=bucket_name)
+            print(f'The s3_bucket {bucket_name} was successfully created')
+        except ClientError:
+            print('This bucket name already exsists')
+    pass
+
+    def upload_data_to_s3_bucket(self, file_name='Champion Info', bucket='lolchampiondata', object_name=None):
+        if object_name is None:
+            object_name = os.path.basename(file_name)
+        s3_client = boto3.client('s3')
+        try:
+            s3_client.upload_file(file_name, bucket, object_name)
+            print('File was uploaded to s3 bucket successfully.')
+        except ClientError:
+            print('The file failed  to upload to the s3 bucket.')
+        pass
        
 if __name__ == '__main__':   
     start = Scraper()
