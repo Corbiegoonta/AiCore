@@ -254,13 +254,14 @@ class Scraper():
         self.display_dict['Champion_Page_Link'].append(image_link)
         pass
     
-    def create_folder(self, folder_name='\Champion Info', parent_directory="C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project"):
+    def create_folder(self, folder_name='\Champion Info', parent_directory=r"C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project"):
         try:
             path = os.path.join(parent_directory, folder_name)
             os.mkdir(path)
             print("Directory created.")
             print(path)
-        except Exception:
+        except Exception as e:
+            print(e)
             print("This directory already exists.")
         pass
 
@@ -286,15 +287,17 @@ class Scraper():
         pass
 
     def create_json_file(self):
-        with open('C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Info'.format('champion_info.json'), 'w') as raw_data_file:
+        with open(r'C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Info'.format('champion_info.json'), 'w') as raw_data_file:
             json.dump(json.dumps(self.display_dict, indent = 4), raw_data_file)
 
     def create_s3_bucket(self, bucket_name='lolchampiondata', region='eu-west-2'):
         try:
-            s3_client = boto3.client('s3')
-            s3_client.create_bucket(Bucket=bucket_name)
+            s3_client = boto3.client('s3', region_name=region)
+            location = {'LocationConstraint': region}
+            s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
             print(f'The s3_bucket {bucket_name} was successfully created')
-        except ClientError:
+        except ClientError as e:
+            print(e)
             print('This bucket name already exsists')
     pass
 
@@ -305,7 +308,8 @@ class Scraper():
         try:
             s3_client.upload_file(file_name, bucket, object_name)
             print('File was uploaded to s3 bucket successfully.')
-        except ClientError:
+        except ClientError as e:
+            print(e)
             print('The file failed  to upload to the s3 bucket.')
         pass
        
