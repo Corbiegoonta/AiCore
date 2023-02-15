@@ -1,4 +1,4 @@
-from cgitb import text
+import errno
 from typing import ChainMap
 import requests
 from selenium.webdriver import Chrome
@@ -13,12 +13,16 @@ import time
 import re
 import uuid
 import pandas as pd
+import certifi
+import ssl
 import json
 import urllib.request
 from urllib.request import urlopen, Request
 import boto3
 from botocore.exceptions import ClientError
 import os
+import pymysql
+from sqlalchemy import create_engine
 
 url = 'https://www.op.gg/'
 
@@ -47,13 +51,12 @@ class Scraper():
 
     def navigate_to_website(self):
         self.driver.get(url)
-        time.sleep(2)
+        time.sleep(1)
         pass
 
     def bypass_cookies(self):
         try:
-            time.sleep(10)
-            button_continer = WebDriverWait(self.driver, 240).until(EC.presence_of_element_located((By.XPATH, '//div[@class="qc-cmp2-summary-buttons"]')))
+            button_continer = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, '//div[@class="qc-cmp2-summary-buttons"]')))
             buttons = button_continer.find_elements(By.XPATH, './button')
             accept_cookies_button = buttons[1]
             accept_cookies_button.click()
@@ -94,7 +97,7 @@ class Scraper():
         pass
 
     def switch_rank_to_all(self):
-        rank_button_container = self.driver.find_element(By.XPATH, '//div[@class="css-1irfcct e5qh6tw1"]')
+        rank_button_container = self.driver.find_element(By.XPATH, '//div[@class="css-1b4j62k e5qh6tw1"]')
         rank_button_container.click()
         time.sleep(2)
         global_button = self.driver.find_element(By.XPATH, '//button[@class="css-16v6t24 e5qh6tw0"]')
@@ -104,22 +107,18 @@ class Scraper():
     
     def click_win_rate(self):
         main_container = self.driver.find_element(By.XPATH, '//div[@class="css-1fcwcq0 e2v0byd0"]')
-        print(main_container)
         main1_container = main_container.find_element(By.XPATH, './main')
         stats_container = main1_container.find_element(By.XPATH, './div')
         stats_table = stats_container.find_element(By.XPATH, './table')
         column_header_contianer = stats_table.find_element(By.XPATH, './thead')
         column_headers = column_header_contianer.find_element(By.XPATH, './tr')
-        print(column_headers)
         individual_headers = column_headers.find_elements(By.XPATH, './th')
         win_rate = individual_headers[3]
-        print(win_rate)
         win_rate.click()
         pass
 
     def get_champion_rows(self):
         main_container = self.driver.find_element(By.XPATH, '//div[@class="css-1fcwcq0 e2v0byd0"]')
-        print(main_container)
         main1_container = main_container.find_element(By.XPATH, './main')
         stats_container = main1_container.find_element(By.XPATH, './div')
         stats_table = stats_container.find_element(By.XPATH, './table')
@@ -128,9 +127,12 @@ class Scraper():
         return champion_rows
 
     def get_patch(self):
-        patch_button_container = self.driver.find_element(By.XPATH, '//button[@class="css-ee3hyw e5qh6tw2"]')
-        patch = patch_button_container.text
-        print(patch)
+        row_container = self.driver.find_elements(By.XPATH, '//div[@class="css-bnue16 e14ouzjd3"]')
+        info_container = row_container[0]
+        patch_number_container = info_container.find_elements(By.XPATH, '//div[@class="css-gfgr92 e5qh6tw3"]')
+        patch_button_container = patch_number_container[1].find_element(By.XPATH, './label')
+        patch_button_container1 = patch_button_container.get_attribute("for")
+        patch = patch_button_container1
         return patch
 
     def get_champion_info(self):
@@ -167,11 +169,12 @@ class Scraper():
                 champion_ban_rate = champion_info_columns[5]
                 self.display_dict['Ban_Rate %'].append(float((champion_ban_rate.text)[:-1]))
                 champion_counters_container = champion_info_columns[6]
-                champion_counters_container1 = champion_counters_container.find_elements(By.XPATH, './div')
+                champion_counters_containers = champion_counters_container.find_elements(By.XPATH, './a')
                 champion_counter_list = []
-                for k in champion_counters_container1:
-                    champion_counter = k.find_element(By.TAG_NAME, 'img')
-                    champion_counter1 = champion_counter.get_attribute("alt")
+                for k in champion_counters_containers:
+                    champion_counters_container1 = k.find_element(By.XPATH, './div')
+                    champion_counters = champion_counters_container1.find_element(By.TAG_NAME, 'img')
+                    champion_counter1 = champion_counters.get_attribute("alt")
                     champion_counter_list.append(champion_counter1)
                 self.display_dict['Champion_Counters'].append(champion_counter_list)
         dict_counter = 0
@@ -179,9 +182,10 @@ class Scraper():
             try:
                 self.get_champion_page(l)
                 self.get_images(self.display_dict['Champion_Page_Link'][dict_counter], l)
+                print("image link added")
                 dict_counter += 1
-            except Exception:
-                print("no pic")
+            except Exception as e:
+                print(e)
                 self.driver.refresh()
         print(self.display_dict['Lane'])
         print(len((self.display_dict['Lane'])))
@@ -220,7 +224,7 @@ class Scraper():
     def create_dataframe(self):
         table = pd.DataFrame(self.display_dict)
         print(table)
-        pass
+        return table
 
     def get_champion_page(self, champion):
         champion_name = champion.lower()
@@ -245,28 +249,28 @@ class Scraper():
             champion_name = ''.join(champion_name)
             print(champion_name)            
         self.driver.get(f'https://www.leagueoflegends.com/en-gb/champions/{champion_name}/')
-        time.sleep(2)
+        time.sleep(1)
         self.accept_lol_page_cookies()
         time.sleep(1)
-        image_contianer = self.driver.find_element(By.XPATH, '//div[@class="style__ForegroundAsset-sc-8gkpub-4 fyyYJz"]')
-        image_tag = image_contianer.find_element_by_tag_name('img')
+        image_contianer = self.driver.find_element(By.XPATH, '//div[@class="style__BackgroundImage-sc-8gkpub-2 WSJaH"]')
+        image_tag = image_contianer.find_element(By.XPATH, './img')
         image_link = image_tag.get_attribute('src')
         self.display_dict['Champion_Page_Link'].append(image_link)
         pass
     
-    def create_folder(self, folder_name='\Champion Info', parent_directory=r"C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project"):
+    def create_folder(self, folder_name=r"/Champion Info", parent_directory=r"/Users/nick/Desktop/Code/AiCore/AiCore/Data Pipeline Project"):
         try:
-            path = os.path.join(parent_directory, folder_name)
-            os.mkdir(path)
-            print("Directory created.")
-            print(path)
-        except Exception as e:
+            path = parent_directory + folder_name 
+            if not os.path.isdir(path):
+                os.mkdir(path)
+                print("Directory created.")
+                print(path)
+        except errno as e:
             print(e)
-            print("This directory already exists.")
         pass
 
     def get_images(self, url, champion_name):
-        urllib.request.urlretrieve(url, rf'C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Info\{champion_name}.jpg')
+        urllib.request.urlretrieve(url, f'/Users/nick/Desktop/Code/AiCore/AiCore/Data Pipeline Project/Champion Info/{champion_name}.jpg')
         pass
 
     def accept_lol_page_cookies(self):
@@ -287,31 +291,127 @@ class Scraper():
         pass
 
     def create_json_file(self):
-        with open(r'C:\Users\nickc\Documents\scratch\AiCore\Data Pipeline Project\Champion Info'.format('champion_info.json'), 'w') as raw_data_file:
+        with open(r'/Users/nick/Desktop/Code/AiCore/AiCore/Data Pipeline Project/Champion Info/champion_info.json', 'w') as raw_data_file:
             json.dump(json.dumps(self.display_dict, indent = 4), raw_data_file)
 
-    def create_s3_bucket(self, bucket_name='lolchampiondata', region='eu-west-2'):
+    def create_s3_bucket(self, bucket_name='lolchampiondata', Location='eu-west-2', 
+    access_key_id='AKIA4BMRGIVBHNGBX26U', secret_access_key='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'):
+        session = boto3.Session(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
+        s3 = session.resource('s3')
         try:
-            s3_client = boto3.client('s3', region_name=region)
-            location = {'LocationConstraint': region}
-            s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
+            s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': Location})
+            bucket = s3.Bucket(bucket_name)
+            bucket.Acl().put(ACL='private')
             print(f'The s3_bucket {bucket_name} was successfully created')
-        except ClientError as e:
+        except Exception as e:
             print(e)
-            print('This bucket name already exsists')
-    pass
-
-    def upload_data_to_s3_bucket(self, file_name='Champion Info', bucket='lolchampiondata', object_name=None):
-        if object_name is None:
-            object_name = os.path.basename(file_name)
-        s3_client = boto3.client('s3')
-        try:
-            s3_client.upload_file(file_name, bucket, object_name)
-            print('File was uploaded to s3 bucket successfully.')
-        except ClientError as e:
-            print(e)
-            print('The file failed  to upload to the s3 bucket.')
         pass
+
+    def upload_data_to_s3_bucket(self, file_name='Champion Info/', bucket_name='lolchampiondata', 
+    access_key_id='AKIA4BMRGIVBHNGBX26U', secret_access_key='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'):
+        session = boto3.Session(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
+        s3 = session.resource('s3')
+        bucket = s3.Bucket(bucket_name)
+    
+        list_of_files = os.listdir(file_name)
+        for file in list_of_files:
+            file_path = rf'/Users/nick/Desktop/Code/AiCore/AiCore/Data Pipeline Project/Champion Info/{file}'
+            file_name = os.path.basename(file_path)
+            try:
+                bucket.upload_file(file_path, file_name)
+                print('File was uploaded to s3 bucket successfully.')
+            except Exception as e:
+                print(e)
+                print('The file failed to upload to the s3 bucket.')
+        pass
+    
+    def upload_dataframe_to_rds(self, host = 'lolchampiondatabase.cudnxxlhkqef.eu-west-2.rds.amazonaws.com',
+        port = int(3306),
+        user = 'admincorbie',
+        password = 'leagueoflegends',
+        database = 'lolchampiondatabase'):
+        
+        try:
+            champion_dataframe = self.create_dataframe()
+            print(f'Dataframe {champion_dataframe} was created succefully.')
+        except Exception as e:
+            print('Creation of dataframe was unsuccessful.')
+            print(e)
+        
+        try:
+            championdatadb = create_engine('mysql+pymysql://' + user + ':' + password + '@' + host + ':' + str(port) + '/' + database , echo=False)
+            print('Create_engine successful.')
+            champion_dataframe.to_sql(name='finalchampdb', con=championdatadb, if_exists='replace', index=False)
+            print('To_sql successful.')
+        except Exception as e:
+            print(e)
+        pass
+
+def upload_dataframe_to_rds(host = 'lolchampiondatabase.cudnxxlhkqef.eu-west-2.rds.amazonaws.com',
+        port = int(3306),
+        user = 'admincorbie',
+        password = 'leagueoflegends',
+        rds_database = 'lolchampiondatabase',
+        sql_database = 'tabl'):
+        
+        alcheng = create_engine('mysql+pymysql://' + user + ':' + password + '@' + host + ':' + str(port) + '/' + sql_database , echo=False)
+        
+        connection = pymysql.connect(host=host,
+                             user=user,
+                             password=password,
+                             db=sql_database)
+
+        cursor = connection.cursor()
+        
+        try:
+            dblist = cursor.execute('SHOW DATABASES')
+            print('Sql shown successfully.1')
+        except Exception as e:
+            print('Sql database was not shown.1')
+
+        try:
+            cursor.execute(f'CREATE DATABASE {sql_database}')
+            print('Sql database created successfully.')
+        except Exception as e:
+            print(e)
+            print('Sql database was not created.')
+
+        try:
+            cursor.execute('SHOW TABLES')
+            print('Sql shown tables successfully.2')
+        except Exception as e:
+            print(e)
+            print('Sql tables were not shown.2')
+
+        for i in cursor:
+            print(i)
+
+        try:
+            test_dict = {'apple' : [1]}
+            test_df = pd.DataFrame(test_dict)
+            print('Dataframe was created succefully.')
+        except Exception as e:
+            print('Creation of dataframe was unsuccessful.')
+            print(e)
+        
+        try:
+            test_df.to_sql(name='Champion_Data_Table', con=alcheng, if_exists='replace', index=False)
+            print('To_sql successful.')
+        except Exception as e:
+            print(e)
+        pass
+
+        cursor.execute('SELECT * FROM Champion_Data_Table')
+
+        cursor.fetchall()
+
+        for i in cursor:
+            print(i)
+        
+        connection.close()
+
+        
+
        
 if __name__ == '__main__':   
     start = Scraper()
