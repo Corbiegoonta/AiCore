@@ -5,9 +5,12 @@ import cv2
 from keras.models import load_model
 import numpy as np
 import random
+
+
+
 def rockpaperscissors():
     def visual():
-        model = load_model('/Users/nickc/Desktop/converted_keras/rps.h5')
+        model = load_model(r"C:\Users\nickc\OneDrive\Desktop\Code\AiCore\Rock Paper Scissors Project\converted_keras\keras_model.h5", compile=False)
         cap = cv2.VideoCapture(0)
         data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
         choice_list = ["nothing", "rock", "paper", "scissors"]
@@ -15,7 +18,7 @@ def rockpaperscissors():
         start_time = time.time()
         end_time = time.time()
         final_time = end_time - start_time
-        while final_time < 5.0: 
+        while final_time < 10.0: 
             ret, frame = cap.read()
             resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
             image_np = np.array(resized_frame)
@@ -49,7 +52,7 @@ def rockpaperscissors():
         ready_check = True
         while ready_check is True:
             try:
-                ready = (input("Press s to make your choice")).lower()
+                ready = (input("Press s to make your choice\n")).lower()
                 if ready == "s":
                     print("Player 1 choose Rock, Paper or Scissors: ")
                     choice = visual()
@@ -59,7 +62,8 @@ def rockpaperscissors():
                         print("Sorry the camera didn't get that. Please try again. Please choose Rock, Paper or Scissors.")
                 else:
                     print("This is an invalid input.")
-            except Exception:
+            except Exception as e:
+                print(e)
                 print("This is an invalid input. Please input a string.")
 
         player1 = None
@@ -77,7 +81,7 @@ def rockpaperscissors():
         ready_check = True
         while ready_check is True:
             try:
-                ready = (input("Press s to make your choice")).lower()
+                ready = (input("Press s to make your choice\n")).lower()
                 if ready == "s":
                     print("Player 2 choose Rock, Paper or Scissors: ")
                     choice = visual()
@@ -143,18 +147,18 @@ def rockpaperscissors():
         while checks is True:
             try:
                 while game_type_check is True:
-                    game_type = int(input("Do you want to play Singleplayer or Multiplayer mode? (Input 1 for Singleplayer , 2 for Multiplayer)"))
+                    game_type = int(input("Do you want to play Singleplayer or Multiplayer mode? (Input 1 for Singleplayer , 2 for Multiplayer)\n"))
                     if game_type == 1 or game_type == 2:
                         game_type_check = False
                         while round_check is True:
-                            number_of_rounds = int(input("How many rounds do you want to play this game? "))
+                            number_of_rounds = int(input("How many rounds do you want to play this game?\n"))
                             if number_of_rounds % 2 == 0:
                                 print("Sorry this is an invaid input. Please input an odd integer number.")
                             else:
                                 round_check = False
                                 checks = False
                     else:
-                        print("This input is invaild> Please choose either 1 or 2.")
+                        print("This input is invaild. Please choose either 1 or 2.")
             except Exception:
                 print("Sorry this is an invaid input. Please input an integer number.")
         
@@ -200,7 +204,7 @@ def rockpaperscissors():
                 play_again_check = True
                 while play_again_check is True:
                     try:
-                        play_again = (input("Do you want to play again? (Yes/No)")).lower()
+                        play_again = (input("Do you want to play again? (Yes/No)\n")).lower()
                         if play_again == "yes" or play_again == "no":
                             play_again_check = False
                             round_on = False
