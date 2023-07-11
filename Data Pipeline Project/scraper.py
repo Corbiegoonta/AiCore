@@ -312,7 +312,7 @@ class Scraper():
             json.dump(json.dumps(self.display_dict, indent = 4), raw_data_file)
 
     def create_s3_bucket(self, bucket_name='lolchampiondata', Location='eu-west-2', 
-        access_key_id='AKIA4BMRGIVBJ5AVGRII', secret_access_key='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'):
+        access_key_id=a, secret_access_key=b):
         session = boto3.Session(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
         s3 = session.resource('s3')
         try:
@@ -323,7 +323,7 @@ class Scraper():
         pass
 
     def upload_data_to_s3_bucket(self, file_name='Champion Info/', bucket_name='lolchampiondata', 
-        access_key_id='AKIA4BMRGIVBJ5AVGRII', secret_access_key='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'):
+        access_key_id=a, secret_access_key=b):
         session = boto3.Session(aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
         s3 = session.resource('s3')
         bucket = s3.Bucket(bucket_name)
