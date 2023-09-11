@@ -1,0 +1,6 @@
+selenium
+pandas
+urllib3
+boto3
+click
+
