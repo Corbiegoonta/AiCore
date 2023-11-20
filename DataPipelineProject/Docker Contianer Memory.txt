@@ -1,0 +1,3 @@
+In your Docker run add this as an extra option to share 2GB of disk space to the contianer --shm-size="2g" (edited)
+[13:32]
+docker run -it --shm-size="3g" scraperf

@@ -1,4 +1,4 @@
-from scraper import Scraper
+from scraper_docker import Scraper
 
 bot = Scraper()
 bot.navigate_to_website()

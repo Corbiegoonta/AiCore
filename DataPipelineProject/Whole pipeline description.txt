@@ -1,0 +1,17 @@
+write scraper code to scrape data from site, place in dataframe, place in json file, save json file and images to local directory, create s3 bucket, upload data to s3 bucket 
+write scraper dockerfile using selenium based image
+write prometheus dockerfile with prometheus based image for monitoring
+write prometheus yaml file
+build scraper dockerfile with requirements 
+build promethuus dockerfile with prometheus yaml file
+upload scraper and prometheus dockerfile to docker hub
+create ec2 instance
+download scraper and prometheus dockerfile onto ec2 instance 
+create docker daemon
+open port 9090 for prometheus 
+download grafana onto ec2 instance for visualising monitoring
+run scraper dockerfile with adequate memory 
+run prometheus dockerfile to port 9090
+run grafana
+login to grafana 
+build visualisation dashboards 
