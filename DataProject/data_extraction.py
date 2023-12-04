@@ -4,6 +4,11 @@ import yaml
 import tabula
 from api_key import api_key
 import requests
+import boto3
+from urllib.request import urlopen
+import ast
+import json
+import s3fs
 
 
 class DataExtractor:
@@ -58,10 +63,40 @@ class DataExtractor:
         return udpdf
     
     def retrieve_pdf_data(self, pdf_link='https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf'):
-        pdf_df = tabula.read_pdf(pdf_link, stream=True)
-        pdf_df = pdf_df[0]
+        pdf_df = tabula.read_pdf(pdf_link, pages='all')
+        # print(type(pd.DataFrame.to_dict(pdf_df[0])))
+        df_dict = {'card_number' : [],
+                   'expiry_date' : [],
+                   'card_provider' : [],
+                   'date_payment_confirmed' : []                   
+                   }
+        for page in pdf_df:
+            # print(page)
+            page = pd.DataFrame.to_dict(page)
+            for column in page:
+                # print(column)
+                for index in page[column]:
+                    # print(page[column][index])
+        #             # print(column)
+                    # print(index)
+        # #             # print(page)
+        # #             # print(column)
+                    # print(index)
+                    df_dict[column].append(page[column][index])
+            # print(page)
+            # print(df_dict)
+            # df_dict.update(page)
+            # print('updated')
+        # print(df_dict)
+        df_dict = pd.DataFrame(df_dict)
+        # df_dict.to_excel('test_dict.xlsx')
+        # print(df_dict.to_string()) 
+        # print(pdf_df)
+        # pdf_df = pdf_df[0]
+        # pdf_df = pdf_df.to_dict()
+        # print(pdf_df)
         print('Pdf file has be extracted sucessfully.')
-        return pdf_df
+        return df_dict
 
     def list_number_of_stores(self, headers=api_key, num_of_stores_endpoint='https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores'):
         response = requests.get(url=num_of_stores_endpoint, headers=headers)
@@ -86,5 +121,12 @@ class DataExtractor:
         return storedf
     pass
 
+    def extract_from_s3(self, address='s3://data-handling-public/products.csv'):
+        data = pd.read_csv(address)
+        fdf = pd.DataFrame(data)
+        return fdf
+
 # print(DataExtractor().read_rds_table())
-DataExtractor().retrieve_stores_data()
+# DataExtractor().retrieve_stores_data()
+# DataExtractor().retrieve_pdf_data()
+DataExtractor().extract_from_s3()
