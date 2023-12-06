@@ -76,6 +76,7 @@ class DataCleaning:
 
     def convert_product_weights(self, pdf=DataExtractor().extract_from_s3()):
         pdf = pdf.dropna()
+        # pdf['weight'].replace('77g .','77g', inplace=True)
         for weight in pdf.weight:
             # if type(weight) is float:
             #     print(weight)
@@ -91,11 +92,67 @@ class DataCleaning:
             if weight[-1:] != 'g' and weight[-1:] != 'l' and weight[-1:] != 'z':
                 # print(weight)
                 pdf = pdf[pdf.weight != weight]
+            if 'x' in weight:
+                index = weight.index('x')
+                num1 = int(weight[:(index - 1)])
+                num2 = int(weight[(index + 1):-1])
+                total = num1 * num2
+                stotal = str(total) + 'g'
+                # print(stotal)
+                pdf['weight'].replace(weight, stotal, inplace=True)
+        # print(pdf)
         # for weights in pdf.weight:
         #     if weights[-1:] != 'g' and weights[-1:] != 'l' and weights[-1:] != 'z':
-        #             print(weights)
+                    # print(weights)
+        for weights in pdf.weight:
+            if weights[-2:] != 'kg':
+                if weights[-2:] == 'ml':
+                    number = float(weights[:-2])
+                    # print(number)
+                    fnum = round((number/1000), 3)
+                    # print(fnum)
+                    fsnum = str(fnum) + 'kg'
+                    # print(fsnum)
+                    pdf['weight'].replace(weights, fsnum, inplace=True)
+                elif weights[-1:] == 'g':
+                    number = float(weights[:-1])
+                    # print(number)
+                    fnum = round((number/1000), 3)
+                    # print(fnum)
+                    fsnum = str(fnum) + 'kg'
+                    # print(fsnum)
+                    pdf['weight'].replace(weights, fsnum, inplace=True)
+                elif weights[-2:] == 'oz':
+                    number = float(weights[:-2])
+                    # print(number)
+                    fnumber = round(((number * 28.4131)/1000), 3)
+                    # print(fnumber)
+                    snum = str(fnumber) + 'kg'
+                    # print(snum)
+                    pdf['weight'].replace(weights, snum, inplace=True)
+            else:
+                number = float(weights[:-2])
+                # print(number)
+                fnum = round(number, 3)
+                # print(fnum)
+                fsnum = str(fnum) + 'kg'
+                # print(fsnum)
+                pdf['weight'].replace(weights, fsnum, inplace=True)
+        print(pdf.to_string())
+        # for i in pdf.weight:
+        # # # # #     if 'kg' not in i:
+        # # # # #         print(i)
+            # print(i)
+            # print(type(i))
+            #     index = weights.index('x')
+            #     num1 = int(weights[:(index - 1)])
+            #     num2 = int(weights[(index + 2):-1])
+            #     total = num1 * num2
+            #     stotal = str(total) + 'g'
+            #     # print(stotal)
+            #     pdf['weight'].replace(weights, stotal, inplace=True)
         # for weights in pdf.weight:
-        #     if 'x' in weights:
+        #     if 'oz' in weights:
         #         print(weights)
             # if weights[-2:] == 'ml':
             #     a = None
@@ -108,7 +165,7 @@ class DataCleaning:
                 #     print(weights)
                 # print(weights)
 
-            return pdf
+        return pdf
 
 
 # DataCleaning().clean_user_data()
