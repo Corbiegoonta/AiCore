@@ -39,7 +39,7 @@ class DatabaseConnector():
         table_names = inspector.get_table_names()
         return table_names
 
-    def upload_to_db(self, database_name='sales_data', user_table_name='dim_users', card_table_name='dim_card_details', called_clean_store_table_name='dim_store_details', password=password):
+    def upload_to_db(self, database_name='sales_data', user_table_name='dim_users', card_table_name='dim_card_details', called_clean_store_table_name='dim_store_details', clean_products_data_table_name='dim_products', password=password):
 
         database_type = 'postgresql'
         database_api = 'psycopg2'
@@ -62,6 +62,10 @@ class DatabaseConnector():
         ccsddf = DataCleaning().called_clean_store_data()
         ccsddf.to_sql(name=called_clean_store_table_name, con=engine, if_exists='replace', index=False)
         print(f'Your data has been uploaded to the {database_name} successfully under the {called_clean_store_table_name} table.')
+
+        cpddf = DataCleaning().clean_products_data()
+        cpddf.to_sql(name=clean_products_data_table_name, con=engine, if_exists='replace', index=False)
+        print(f'Your data has been uploaded to the {database_name} successfully under the {clean_products_data_table_name} table.')
 
         pass
     

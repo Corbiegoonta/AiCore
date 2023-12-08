@@ -138,7 +138,8 @@ class DataCleaning:
                 fsnum = str(fnum) + 'kg'
                 # print(fsnum)
                 pdf['weight'].replace(weights, fsnum, inplace=True)
-        print(pdf.to_string())
+        # print(pdf.to_string())
+        # pdf.value_counts()
         # for i in pdf.weight:
         # # # # #     if 'kg' not in i:
         # # # # #         print(i)
@@ -167,6 +168,24 @@ class DataCleaning:
 
         return pdf
 
+    def clean_products_data(self):
+        pdf = self.convert_product_weights()
+        pdf.product_name = pdf.product_name.astype('string', errors='raise')
+        pdf.product_price = pdf.product_price.astype('string', errors='raise')
+        pdf.weight = pdf.weight.astype('string', errors='raise')
+        pdf.product_name = pdf.product_name.astype('string', errors='raise')
+        pdf.category = pdf.category.astype('string', errors='raise')
+        pdf.EAN = pd.to_numeric(pdf.EAN, errors='coerce')
+        pdf.date_added = pd.to_datetime(pdf.date_added, format='%Y-%m-%d', errors='coerce')
+        pdf.uuid = pdf.uuid.astype('object', errors='raise')
+        pdf.removed = pdf.removed.astype('string', errors='raise')
+        pdf.product_code = pdf.product_code.astype('object', errors='raise')
+        pdf.rename(columns={'Unnamed: 0' : 'number'}, inplace=True)
+        pdf = pdf.dropna()
+        pdf.info()
+        # for i in pdf:
+        #     print(i)
+        return pdf
 
 # DataCleaning().clean_user_data()
-DataCleaning().convert_product_weights()
+DataCleaning().clean_products_data()
