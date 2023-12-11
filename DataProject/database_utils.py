@@ -37,9 +37,10 @@ class DatabaseConnector():
     def list_db_tables(self):
         inspector = inspect(self.init_db_engine())
         table_names = inspector.get_table_names()
+        print(table_names)
         return table_names
 
-    def upload_to_db(self, database_name='sales_data', user_table_name='dim_users', card_table_name='dim_card_details', called_clean_store_table_name='dim_store_details', clean_products_data_table_name='dim_products', password=password):
+    def upload_to_db(self, database_name='sales_data', user_table_name='dim_users', card_table_name='dim_card_details', called_clean_store_table_name='dim_store_details', clean_products_data_table_name='dim_products', clean_orders_data_table_name='orders_table', clean_sales_data_table_name='dim_date_times', password=password):
 
         database_type = 'postgresql'
         database_api = 'psycopg2'
@@ -66,6 +67,14 @@ class DatabaseConnector():
         cpddf = DataCleaning().clean_products_data()
         cpddf.to_sql(name=clean_products_data_table_name, con=engine, if_exists='replace', index=False)
         print(f'Your data has been uploaded to the {database_name} successfully under the {clean_products_data_table_name} table.')
+
+        coddf = DataCleaning().clean_orders_data()
+        coddf.to_sql(name=clean_orders_data_table_name, con=engine, if_exists='replace', index=False)
+        print(f'Your data has been uploaded to the {database_name} successfully under the {clean_orders_data_table_name} table.')
+
+        csddf = DataCleaning().clean_sales_data()
+        csddf.to_sql(name=clean_sales_data_table_name, con=engine, if_exists='replace', index=False)
+        print(f'Your data has been uploaded to the {database_name} successfully under the {clean_sales_data_table_name} table.')
 
         pass
     

@@ -39,12 +39,15 @@ class DataExtractor:
         inspector = inspect(engine)
         table_names = inspector.get_table_names()
         user_details = table_names[1]
+        store_details = table_names[0]
+        orders = table_names[2]
 
-        # with engine.connect() as connection:
-        #     result = connection.execute(text(f"SELECT * FROM {store_details}"))
-        #     # for row in result:
-        #     #     print(row)
-        #     sdpdf = pd.DataFrame(result)
+
+        with engine.connect() as connection:
+            result = connection.execute(text(f"SELECT * FROM {store_details}"))
+            # for row in result:
+            #     print(row)
+            sdpdf = pd.DataFrame(result)
 
         with engine.connect() as connection:
             result = connection.execute(text(f"SELECT * FROM {user_details}"))
@@ -52,15 +55,15 @@ class DataExtractor:
             #     print(row)
             udpdf = pd.DataFrame(result)
 
-        # with engine.connect() as connection:
-        #     result = connection.execute(text(f"SELECT * FROM {orders}"))
-        #     # for row in result:
-        #     #     print(row)
-        #     opdf = pd.DataFrame(result)
+        with engine.connect() as connection:
+            result = connection.execute(text(f"SELECT * FROM {orders}"))
+            # for row in result:
+            #     print(row)
+            opdf = pd.DataFrame(result)
         
-        # ucdata = [sdpdf, udpdf, opdf]
-        
-        return udpdf
+        ucdata = {'store_details':sdpdf, 'user_details':udpdf, 'orders':opdf}
+
+        return ucdata
     
     def retrieve_pdf_data(self, pdf_link='https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf'):
         pdf_df = tabula.read_pdf(pdf_link, pages='all')
@@ -125,8 +128,14 @@ class DataExtractor:
         data = pd.read_csv(address)
         fdf = pd.DataFrame(data)
         return fdf
+    
+    def retrieve_sales_data(self,headers=api_key):
+        response = requests.get(url=f'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json', headers=headers)
+        sales = response.json()
+        salesdf = pd.DataFrame(sales)
+        return salesdf
 
 # print(DataExtractor().read_rds_table())
 # DataExtractor().retrieve_stores_data()
 # DataExtractor().retrieve_pdf_data()
-DataExtractor().extract_from_s3()
+DataExtractor().retrieve_sales_data()

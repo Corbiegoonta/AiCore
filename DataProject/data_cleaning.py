@@ -8,7 +8,7 @@ class DataCleaning:
     def __init__(self):
         pass
 
-    def clean_user_data(self, user_details = DataExtractor().read_rds_table()):
+    def clean_user_data(self, user_details = DataExtractor().read_rds_table()['user_details']):
         # user_details.info()
         try:
             user_details.first_name = user_details.first_name.astype('string', errors='raise')
@@ -182,10 +182,31 @@ class DataCleaning:
         pdf.product_code = pdf.product_code.astype('object', errors='raise')
         pdf.rename(columns={'Unnamed: 0' : 'number'}, inplace=True)
         pdf = pdf.dropna()
-        pdf.info()
+        # pdf.info()
         # for i in pdf:
         #     print(i)
         return pdf
+    
+    def clean_orders_data(self, orders_table=DataExtractor().read_rds_table()['orders']):
+        # print(orders_table)
+        # orders_table.info()
+        orders_table = orders_table.drop(columns=['1','first_name','last_name'])
+        # orders_table.info()
+        return orders_table
+    
+    def clean_sales_data(self, sdf=DataExtractor().retrieve_sales_data()):
+        # sdf.info()
+        # print(sdf)
+        # sdf.timestamp = sdf.timestamp.astype('string', errors='raise')
+        sdf.timestamp = pd.to_datetime(sdf.timestamp, format='%H:%M:%S', errors='coerce').dt.time
+        sdf.dropna(inplace=True)
+        sdf.month = sdf.month.astype('int64', errors='raise')
+        sdf.year = sdf.year.astype('int64', errors='raise')
+        sdf.day = sdf.day.astype('int64', errors='raise')
+        sdf.time_period = sdf.time_period.astype('string', errors='raise')
+        # sdf.info()
+        # print(sdf)
+        return sdf
 
 # DataCleaning().clean_user_data()
-DataCleaning().clean_products_data()
+DataCleaning().clean_sales_data()
