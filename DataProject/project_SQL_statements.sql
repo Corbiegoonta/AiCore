@@ -1,0 +1,106 @@
+-- ALTER TABLE orders_table
+-- 	ALTER COLUMN date_uuid TYPE UUID USING user_uuid::UUID;
+-- ALTER TABLE orders_table
+-- 	ALTER COLUMN date_uuid TYPE char;
+-- select * from dim_card_details
+-- select * from dim_date_times
+-- select * from dim_products
+-- select * from dim_store_details
+-- select * from dim_users
+-- ALTER TABLE orders_table
+-- 	ALTER COLUMN card_number TYPE bigint USING card_number::bigint;
+-- SELECT LENGTH(CAST((MAX(store_code)) AS TEXT)) AS varcharnum FROM orders_table
+
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN longitude TYPE FLOAT;
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN locality TYPE VARCHAR(255);
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN store_code TYPE VARCHAR(11);
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN staff_numbers TYPE SMALLINT;
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN opening_date TYPE DATE;
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN latitude TYPE FLOAT;
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN country_code TYPE VARCHAR(2);
+-- ALTER TABLE dim_store_details
+-- ALTER COLUMN continent TYPE VARCHAR(255);
+-- SELECT LENGTH(country_code) AS SC FROM dim_store_details ORDER BY SC DESC;
+
+-- UPDATE dim_products SET product_price = REPLACE(product_price, '£', '');
+-- ALTER TABLE dim_products
+-- ADD weight_class TEXT;
+-- ALTER TABLE dim_products
+-- ALTER COLUMN weight_class TYPE VARCHAR(14);
+-- UPDATE dim_products 
+-- SET weight_class = weight;
+-- UPDATE dim_products 
+-- SET weight_class = REPLACE(weight_class, 'kg', '');
+-- UPDATE dim_products 
+-- SET weight = REPLACE(weight, 'kg', '');
+-- UPDATE dim_products
+-- SET weight_class =
+-- CASE
+-- 	WHEN (CAST(weight_class as FLOAT)) < 2 THEN 'Light' 
+-- 	WHEN (CAST(weight_class as FLOAT)) BETWEEN 2 AND 39.999 THEN 'Mid_sized'
+-- 	WHEN (CAST(weight_class as FLOAT)) BETWEEN 40 AND 139.999 THEN 'Heavy'
+-- 	ELSE 'Truck_required'
+-- END;
+-- ALTER TABLE dim_products
+-- ALTER COLUMN product_price TYPE DOUBLE PRECISION USING product_price::DOUBLE PRECISION;
+-- ALTER TABLE dim_products
+-- ALTER COLUMN weight TYPE DOUBLE PRECISION USING weight::DOUBLE PRECISION;
+-- ALTER TABLE dim_products 
+-- ALTER COLUMN date_added TYPE DATE;
+-- ALTER TABLE dim_products 
+-- ALTER COLUMN "uuid" TYPE UUID USING "uuid"::UUID;
+-- SELECT LENGTH(CAST((MAX("EAN")) AS TEXT)) AS varcharnum FROM dim_products;
+-- ALTER TABLE dim_products 
+-- ALTER COLUMN "EAN" TYPE VARCHAR(17);
+-- -- SELECT LENGTH(product_code) AS PC FROM dim_products ORDER BY PC DESC; 
+-- ALTER TABLE dim_products 
+-- ALTER COLUMN product_code TYPE VARCHAR(11);
+-- ALTER TABLE dim_products
+-- RENAME COLUMN removed TO still_available;
+-- -- SELECT LENGTH(weight_class) AS WC FROM dim_products ORDER BY WC DESC; 
+-- ALTER TABLE dim_products 
+-- ALTER COLUMN weight_class TYPE VARCHAR(14);
+-- UPDATE dim_products
+-- SET still_available =
+-- CASE
+-- 	WHEN still_available = 'Still_avaliable' THEN 'true'
+-- 	WHEN still_available = 'Removed' THEN 'false'
+-- END;
+-- ALTER TABLE dim_products 
+-- ALTER COLUMN still_available TYPE BOOL USING still_available::BOOL;
+
+-- SELECT LENGTH(CAST((MAX("day")) AS TEXT)) AS varcharnum FROM dim_date_times
+-- SELECT LENGTH(time_period) AS PC FROM dim_date_times ORDER BY PC ASC; 
+-- ALTER TABLE dim_date_times 
+-- ALTER COLUMN date_uuid TYPE UUID USING date_uuid::UUID;
+-- ALTER TABLE dim_date_times 
+-- ALTER COLUMN month TYPE VARCHAR(2);
+-- ALTER TABLE dim_date_times 
+-- ALTER COLUMN year TYPE VARCHAR(4);
+-- ALTER TABLE dim_date_times 
+-- ALTER COLUMN day TYPE VARCHAR(2);
+-- ALTER TABLE dim_date_times 
+-- ALTER COLUMN time_period TYPE VARCHAR(10);
+
+-- SELECT LENGTH(CAST((MAX(card_number)) AS TEXT)) AS varcharnum FROM dim_card_details
+-- SELECT LENGTH(CAST(expiry_date AS TEXT)) AS PC FROM dim_card_details ORDER BY PC DESC;
+-- ALTER TABLE dim_card_details
+-- ALTER COLUMN card_number TYPE VARCHAR(22);
+-- ALTER TABLE dim_card_details
+-- ALTER COLUMN expiry_date TYPE VARCHAR(19);
+-- ALTER TABLE dim_card_details
+-- ALTER COLUMN date_payment_confirmed TYPE DATE;
+
+-- SELECT * FROM dim_card_details
+-- SELECT * FROM dim_date_times
+SELECT * FROM dim_products
+-- SELECT * FROM dim_store_details
+-- SELECT * FROM dim_users
+-- SELECT * FROM dim_orders_table
