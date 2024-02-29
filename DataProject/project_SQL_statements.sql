@@ -1,22 +1,26 @@
+-- SELECT LENGTH(CAST((MAX(product_code)) AS TEXT)) AS varcharnum FROM orders_table
+-- SELECT LENGTH(product_code) AS SC FROM orders_table ORDER BY SC DESC;
 -- ALTER TABLE orders_table
--- 	ALTER COLUMN date_uuid TYPE UUID USING user_uuid::UUID;
+-- 	ALTER COLUMN date_uuid TYPE UUID USING date_uuid::UUID;
 -- ALTER TABLE orders_table
--- 	ALTER COLUMN date_uuid TYPE char;
--- select * from dim_card_details
--- select * from dim_date_times
--- select * from dim_products
--- select * from dim_store_details
--- select * from dim_users
+-- 	ALTER COLUMN user_uuid TYPE UUID USING user_uuid::UUID;
 -- ALTER TABLE orders_table
--- 	ALTER COLUMN card_number TYPE bigint USING card_number::bigint;
--- SELECT LENGTH(CAST((MAX(store_code)) AS TEXT)) AS varcharnum FROM orders_table
+-- 	ALTER COLUMN product_quantity TYPE SMALLINT USING product_quantity::SMALLINT;
+-- ALTER TABLE orders_table
+-- ALTER COLUMN card_number TYPE VARCHAR(19);
+-- ALTER TABLE orders_table
+-- ALTER COLUMN store_code TYPE VARCHAR(12);
+-- ALTER TABLE orders_table
+-- ALTER COLUMN product_code TYPE VARCHAR(11);
 
+
+-- SELECT LENGTH(store_code) AS SC FROM dim_store_details ORDER BY SC DESC;
 -- ALTER TABLE dim_store_details
 -- ALTER COLUMN longitude TYPE FLOAT;
 -- ALTER TABLE dim_store_details
 -- ALTER COLUMN locality TYPE VARCHAR(255);
 -- ALTER TABLE dim_store_details
--- ALTER COLUMN store_code TYPE VARCHAR(11);
+-- ALTER COLUMN store_code TYPE VARCHAR(12);
 -- ALTER TABLE dim_store_details
 -- ALTER COLUMN staff_numbers TYPE SMALLINT;
 -- ALTER TABLE dim_store_details
@@ -27,8 +31,12 @@
 -- ALTER COLUMN country_code TYPE VARCHAR(2);
 -- ALTER TABLE dim_store_details
 -- ALTER COLUMN continent TYPE VARCHAR(255);
--- SELECT LENGTH(country_code) AS SC FROM dim_store_details ORDER BY SC DESC;
+-- ALTER TABLE dim_store_details
+-- ADD PRIMARY KEY (store_code);
 
+-- SELECT LENGTH(CAST((MAX("EAN")) AS TEXT)) AS varcharnum FROM dim_products;
+-- -- SELECT LENGTH(product_code) AS PC FROM dim_products ORDER BY PC DESC;
+-- -- SELECT LENGTH(weight_class) AS WC FROM dim_products ORDER BY WC DESC; 
 -- UPDATE dim_products SET product_price = REPLACE(product_price, '£', '');
 -- ALTER TABLE dim_products
 -- ADD weight_class TEXT;
@@ -56,15 +64,12 @@
 -- ALTER COLUMN date_added TYPE DATE;
 -- ALTER TABLE dim_products 
 -- ALTER COLUMN "uuid" TYPE UUID USING "uuid"::UUID;
--- SELECT LENGTH(CAST((MAX("EAN")) AS TEXT)) AS varcharnum FROM dim_products;
 -- ALTER TABLE dim_products 
 -- ALTER COLUMN "EAN" TYPE VARCHAR(17);
--- -- SELECT LENGTH(product_code) AS PC FROM dim_products ORDER BY PC DESC; 
 -- ALTER TABLE dim_products 
 -- ALTER COLUMN product_code TYPE VARCHAR(11);
 -- ALTER TABLE dim_products
 -- RENAME COLUMN removed TO still_available;
--- -- SELECT LENGTH(weight_class) AS WC FROM dim_products ORDER BY WC DESC; 
 -- ALTER TABLE dim_products 
 -- ALTER COLUMN weight_class TYPE VARCHAR(14);
 -- UPDATE dim_products
@@ -75,6 +80,8 @@
 -- END;
 -- ALTER TABLE dim_products 
 -- ALTER COLUMN still_available TYPE BOOL USING still_available::BOOL;
+-- ALTER TABLE dim_products
+-- ADD PRIMARY KEY (product_code);
 
 -- SELECT LENGTH(CAST((MAX("day")) AS TEXT)) AS varcharnum FROM dim_date_times
 -- SELECT LENGTH(time_period) AS PC FROM dim_date_times ORDER BY PC ASC; 
@@ -88,19 +95,59 @@
 -- ALTER COLUMN day TYPE VARCHAR(2);
 -- ALTER TABLE dim_date_times 
 -- ALTER COLUMN time_period TYPE VARCHAR(10);
+-- ALTER TABLE dim_date_times
+-- ADD PRIMARY KEY (date_uuid);
 
--- SELECT LENGTH(CAST((MAX(card_number)) AS TEXT)) AS varcharnum FROM dim_card_details
+-- SELECT LENGTH(CAST(card_number AS TEXT)) AS varcharnum FROM dim_card_details ORDER BY varcharnum DESC;
 -- SELECT LENGTH(CAST(expiry_date AS TEXT)) AS PC FROM dim_card_details ORDER BY PC DESC;
 -- ALTER TABLE dim_card_details
--- ALTER COLUMN card_number TYPE VARCHAR(22);
+-- ALTER COLUMN card_number TYPE BIGINT USING card_number::BIGINT;
+-- ALTER TABLE dim_card_details
+-- ALTER COLUMN card_number TYPE VARCHAR(19);
 -- ALTER TABLE dim_card_details
 -- ALTER COLUMN expiry_date TYPE VARCHAR(19);
 -- ALTER TABLE dim_card_details
 -- ALTER COLUMN date_payment_confirmed TYPE DATE;
+-- ALTER TABLE dim_card_details
+-- ADD PRIMARY KEY (card_number);
+
+-- ALTER TABLE dim_users
+-- ALTER COLUMN first_name TYPE VARCHAR(255);
+-- ALTER TABLE dim_users
+-- ALTER COLUMN last_name TYPE VARCHAR(255);
+-- ALTER TABLE dim_users
+-- ALTER COLUMN date_of_birth TYPE DATE;
+-- ALTER TABLE dim_users
+-- ALTER COLUMN country_code TYPE VARCHAR(2);
+-- ALTER TABLE dim_users
+-- ALTER COLUMN user_uuid TYPE UUID USING user_uuid::UUID;
+-- ALTER TABLE dim_users
+-- ALTER COLUMN join_date TYPE DATE;
+-- ALTER TABLE dim_users
+-- ADD PRIMARY KEY (user_uuid);
+
+-- ALTER TABLE orders_table
+-- ADD FOREIGN KEY (date_uuid) REFERENCES dim_date_times(date_uuid);
+-- ALTER TABLE orders_table
+-- ADD FOREIGN KEY (user_uuid) REFERENCES dim_users(user_uuid);
+-- ALTER TABLE orders_table
+-- ADD FOREIGN KEY (card_number) REFERENCES dim_card_details(card_number);
+-- ALTER TABLE orders_table
+-- ADD FOREIGN KEY (store_code) REFERENCES dim_store_details(store_code);
+-- ALTER TABLE orders_table
+-- ADD FOREIGN KEY (product_code) REFERENCES dim_products(product_code);
+
+-- SELECT * FROM orders_table WHERE card_number NOT IN (SELECT dim_card_details.card_number FROM dim_card_details);
+-- SELECT * FROM orders_table WHERE user_uuid NOT IN (SELECT dim_users.user_uuid FROM dim_users);
+-- SELECT * FROM orders_table WHERE store_code NOT IN (SELECT dim_store_details.store_code FROM dim_store_details);
+-- SELECT * FROM orders_table WHERE product_code NOT IN (SELECT dim_products.product_code FROM dim_products);
+-- SELECT * FROM orders_table WHERE date_uuid NOT IN (SELECT dim_date_times.date_uuid FROM dim_date_times);
+
+-- SELECT * FROM dim_card_details WHERE dim_card_details.card_number = '3529023891650490';
 
 -- SELECT * FROM dim_card_details
 -- SELECT * FROM dim_date_times
-SELECT * FROM dim_products
+-- SELECT * FROM dim_products
 -- SELECT * FROM dim_store_details
 -- SELECT * FROM dim_users
--- SELECT * FROM dim_orders_table
+SELECT * FROM orders_table
