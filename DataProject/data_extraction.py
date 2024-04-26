@@ -4,11 +4,6 @@ import yaml
 import tabula
 from api_key import api_key
 import requests
-import boto3
-from urllib.request import urlopen
-import ast
-import json
-import s3fs
 
 
 class DataExtractor:
@@ -74,30 +69,11 @@ class DataExtractor:
                    'date_payment_confirmed' : []                   
                    }
         for page in pdf_df:
-            # print(page)
             page = pd.DataFrame.to_dict(page)
             for column in page:
-                # print(column)
                 for index in page[column]:
-                    # print(page[column][index])
-        #             # print(column)
-                    # print(index)
-        # #             # print(page)
-        # #             # print(column)
-                    # print(index)
                     df_dict[column].append(page[column][index])
-            # print(page)
-            # print(df_dict)
-            # df_dict.update(page)
-            # print('updated')
-        # print(df_dict)
         df_dict = pd.DataFrame(df_dict)
-        # df_dict.to_excel('test_dict.xlsx')
-        # print(df_dict.to_string()) 
-        # print(pdf_df)
-        # pdf_df = pdf_df[0]
-        # pdf_df = pdf_df.to_dict()
-        # print(pdf_df)
         print('Pdf file has be extracted sucessfully.')
         return df_dict
 
@@ -119,10 +95,9 @@ class DataExtractor:
             stores = response.json()
             for field in stores:
                 store_dict[field].append(stores[field])
-        # print(store_dict)
         storedf = pd.DataFrame(store_dict)
+        
         return storedf
-    pass
 
     def extract_from_s3(self, address='s3://data-handling-public/products.csv'):
         data = pd.read_csv(address)
@@ -134,8 +109,3 @@ class DataExtractor:
         sales = response.json()
         salesdf = pd.DataFrame(sales)
         return salesdf
-
-# print(DataExtractor().read_rds_table())
-# DataExtractor().retrieve_stores_data()
-# DataExtractor().retrieve_pdf_data()
-DataExtractor().retrieve_sales_data()

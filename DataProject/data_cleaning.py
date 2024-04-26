@@ -9,7 +9,6 @@ class DataCleaning:
         pass
 
     def clean_user_data(self, user_details = DataExtractor().read_rds_table()['user_details']):
-        # print(user_details.isnull().sum())
         user_details.first_name = user_details.first_name.astype('string', errors='raise')
         user_details.last_name = user_details.last_name.astype('string', errors='raise')
         user_details.date_of_birth = pd.to_datetime(user_details.date_of_birth, infer_datetime_format=True, errors='coerce')
@@ -22,67 +21,42 @@ class DataCleaning:
         user_details.phone_number = pd.to_numeric(user_details.phone_number, errors='coerce', downcast="integer")
         print(len(user_details.index))
         print(user_details.isnull().sum())
-        # user_details.phone_number = user_details.phone_number.astype('int64', errors='raise')
         user_details.join_date = pd.to_datetime(user_details.join_date, infer_datetime_format=True, errors='coerce')
         user_details.replace('GGB', 'GB', inplace=True)
-        # print(user_details.dtypes)
-        # pn_regex = '^(?:(?:\(?(?:0(?:0|11)\)?[\s-]?\(?|\+)44\)?[\s-]?(?:\(?0\)?[\s-]?)?)|(?:\(?0))(?:(?:\d{5}\)?[\s-]?\d{4,5})|(?:\d{4}\)?[\s-]?(?:\d{5}|\d{3}[\s-]?\d{3}))|(?:\d{3}\)?[\s-]?\d{3}[\s-]?\d{3,4})|(?:\d{2}\)?[\s-]?\d{4}[\s-]?\d{4}))(?:[\s-]?(?:x|ext\.?|\#)\d{3,4})?$'
-        # user_details.loc[~user_details['phone_number'].str.match(pn_regex), 'phone_number'] = np.nan
-        # user_details['phone_number'] = user_details.loc[~user_details['phone_number'].str.match(pn_regex), 'phone_number'] 
         user_details = user_details.dropna()
-        # print(len(user_details.index))
-        # print(user_details.phone_number)
         print('The user data has been cleaned.')
 
         return user_details
     
     def clean_card_data(self, card_data = DataExtractor().retrieve_pdf_data()):
-        print(card_data.isnull().sum())
-        card_data.card_number = card_data.card_number.replace({r'\(': '',r'\)': '',r' ': '',r'-': '',r'\.': '',r'\+': '',r'[a-z]': '',r'\?': ''}, regex=True)
-        card_data.card_number = pd.to_numeric(card_data.card_number, errors='coerce', downcast='integer')
-        card_data.expiry_date = pd.to_datetime(card_data.expiry_date, format='%m/%y', errors='coerce')
-        card_data.card_provider = card_data.card_provider.astype('string', errors='raise')
-        card_data.date_payment_confirmed = pd.to_datetime(card_data.date_payment_confirmed, infer_datetime_format=True, errors='coerce')
-        print(len(card_data.index))
-        print(card_data.isnull().all())
-        card_data = card_data.dropna()
-        print(card_data[card_data['card_number'] == 4537509987455280000])
         pd.options.display.float_format = '{:.0f}'.format
+        print(len(card_data.index))
         print(card_data[card_data['card_number'] == 4537509987455280000])
+        print(card_data[card_data['card_number'] == 4537509987455280128])
+        print('entire df')
+        card_data.card_number = card_data.card_number.replace({r'\(': '',r'\)': '',r' ': '',r'-': '',r'\.': '',r'\+': '',r'[a-z]': '',r'\?': ''}, regex=True)
+        print(card_data[card_data['card_number'] == 4537509987455280000])
+        print('after regex')
+        card_data.card_number = card_data.card_number.astype('int64', errors='ignore')
+        print(card_data[card_data['card_number'] == 4537509987455280000])
+        print('after numeric')
+        card_data.expiry_date = pd.to_datetime(card_data.expiry_date, format='%m/%y', errors='coerce')
+        print(card_data[card_data['card_number'] == 4537509987455280000])
+        print('after expiry')
+        card_data.card_provider = card_data.card_provider.astype('string', errors='raise')
+        print(card_data[card_data['card_number'] == 4537509987455280000])
+        print('after provider')
+        card_data.date_payment_confirmed = pd.to_datetime(card_data.date_payment_confirmed, infer_datetime_format=True, errors='coerce')
+        print(card_data[card_data['card_number'] == 4537509987455280000])
+        print(card_data[card_data['card_number'] == 4537509987455280128])
+        print('after datetime')
+        card_data = card_data.dropna()
         print('The card details have been cleaned.')
 
         return card_data
     
     def called_clean_store_data(self, sdf = DataExtractor().retrieve_stores_data()):
         sdf = sdf.drop('lat', axis=1)
-        # print(len(sdf.index))
-        # print(sdf.loc[(sdf.index[0])])
-        # sdf.loc[1:] = sdf.loc[1:].dropna(inplace=True)
-        # print(sdf.loc[(sdf.index[0])])
-        # print(len(sdf.index))
-        # print(fr)
-        # print(type(sdf.loc[1:]))
-        # sdf = sdf.dropna()
-        # fr = sdf.loc[(sdf.index[0])]
-        # print(fr)
-        # print(type(fr))
-        # print(sdf.to_string())
-        # sdf = sdf.drop((sdf.loc[(sdf == 'WEB-1388012W').any(axis=1)].index[0]), axis=0)
-        # print(sdf.to_string())
-        # print(sdf.loc[(sdf == 'HI-9B97EE4E').any(axis=1)].index[0])
-        # for i in range(1, len(sdf.index)):
-        #     # for j in range(1, (len(sdf.index) + 1)):
-        #     sdf = sdf.loc[(sdf.index[i])]
-        #         print(type(sdf))
-        #         sdf = sdf.loc[(sdf.index[i])]
-        # #     print(type(i))
-            # if i != 'WEB-1388012W':
-            #     sdf.longitude = pd.to_numeric(sdf.longitude, errors='coerce')
-            # else:
-            #     a = 1
-        # print(sdf.loc[(sdf.index[0])])
-        # print(sdf.loc[(sdf.index[1])])
-        # print(len(sdf.index))
         sdf.longitude = pd.to_numeric(sdf.longitude, errors='coerce')
         sdf.address = sdf.address.astype('string', errors='raise')
         sdf.locality = sdf.locality.astype('string', errors='raise')
@@ -106,47 +80,6 @@ class DataCleaning:
                 il.remove(ind)
         for i in il:
             sdf = sdf.drop(index=i)
-        # print(sdf.loc[(sdf.index[0])])
-        # print(sdf.loc[(sdf.index[1])])
-        # print(len(sdf.index))
-        # il = []
-        # for i in (sdf[sdf['longitude'].isnull()].index):
-        #     il.append(i)
-        # print(il)
-        # print(type(sdf[sdf['longitude'].isnull()]).index)
-        # print(len(sdf[sdf['longitude'].isnull()]))
-        # print(sdf.isnull().)
-        # print(sdf.iloc[0])
-        # print(sdf.to_string())
-        # sdf = sdf.dropna()
-        # print(sdf.loc[-1])
-        # sdf = sdf.sort_index().reset_index(drop=True)
-        # sdf.index = sdf.index + 1  
-        # sdf = sdf.sort_index()  
-        # print(sdf.to_string())
-        # print(sdf)
-        # print(len(sdf.index))
-        # print(sdf.to_string())
-        # if sdf[sdf['store_type'] == 'Web Portal'].any(axis=1) is True:
-        #     ind = sdf[sdf['store_type'] == 'Web Portal'].any(axis=1).index
-        # if ((sdf[sdf['store_type'] == 'Web Portal'].to_dict()['store_type'])[0]) == 'Web Portal':
-            # print('yes')
-        # print(((sdf[sdf['store_type'] == 'Web Portal'].to_dict()['store_type'])[0]))
-        # for i in sdf['store_code']:
-        #     if i == 'n/a' or i == 'N/A' or i == 'null':
-        #         print(sdf[sdf['store_code'] == i].any(axis=1))
-        # print(sdf[sdf['store_code'] == 'WEB-1388012W'].any(axis=1).index)
-        # print(sdf[sdf['longitude'].isnull()])
-        # print(type(sdf[sdf['longitude'].isnull()]))
-        # # print(sdf['longitude'])
-        # if 'Web Portal' in sdf['store_type']:
-        #     print('yes')
-        # print(len(sdf.index))
-        # print(sdf.loc[(sdf.index[0])])
-        # sdf = sdf.dropna(subset='staff_numbers')
-        # sdf = sdf.loc[1:].dropna()
-        # print(sdf.loc[(sdf.index[0])])
-        # print(len(sdf.index))
 
         return sdf
 

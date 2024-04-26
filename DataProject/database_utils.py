@@ -1,8 +1,8 @@
 import yaml
-import psycopg2
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, inspect
 from data_cleaning import DataCleaning
 from pg_password import password
+
 
 class DatabaseConnector():
     
@@ -52,34 +52,32 @@ class DatabaseConnector():
 
         engine = create_engine(f"{database_type}+{database_api}://{user}:{password}@{host}:{port}/{database}")
 
-        uddf = DataCleaning().clean_user_data()
-        uddf.to_sql(name=user_table_name, con=engine, if_exists='replace', index=False)
-        print(f'Your data has been uploaded to the {database_name} successfully under the {user_table_name} table.')
+        # uddf = DataCleaning().clean_user_data()
+        # uddf.to_sql(name=user_table_name, con=engine, if_exists='replace', index=False)
+        # print(f'Your data has been uploaded to the {database_name} successfully under the {user_table_name} table.')
 
         cddf = DataCleaning().clean_card_data()
         cddf.to_sql(name=card_table_name, con=engine, if_exists='replace', index=False)
         print(f'Your data has been uploaded to the {database_name} successfully under the {card_table_name} table.')
 
-        ccsddf = DataCleaning().called_clean_store_data()
-        ccsddf.to_sql(name=called_clean_store_table_name, con=engine, if_exists='replace', index=False)
-        print(f'Your data has been uploaded to the {database_name} successfully under the {called_clean_store_table_name} table.')
+        # ccsddf = DataCleaning().called_clean_store_data()
+        # ccsddf.to_sql(name=called_clean_store_table_name, con=engine, if_exists='replace', index=False)
+        # print(f'Your data has been uploaded to the {database_name} successfully under the {called_clean_store_table_name} table.')
 
-        cpddf = DataCleaning().clean_products_data()
-        cpddf.to_sql(name=clean_products_data_table_name, con=engine, if_exists='replace', index=False)
-        print(f'Your data has been uploaded to the {database_name} successfully under the {clean_products_data_table_name} table.')
+        # cpddf = DataCleaning().clean_products_data()
+        # cpddf.to_sql(name=clean_products_data_table_name, con=engine, if_exists='replace', index=False)
+        # print(f'Your data has been uploaded to the {database_name} successfully under the {clean_products_data_table_name} table.')
 
-        coddf = DataCleaning().clean_orders_data()
-        coddf.to_sql(name=clean_orders_data_table_name, con=engine, if_exists='replace', index=False)
-        print(f'Your data has been uploaded to the {database_name} successfully under the {clean_orders_data_table_name} table.')
+        # coddf = DataCleaning().clean_orders_data()
+        # coddf.to_sql(name=clean_orders_data_table_name, con=engine, if_exists='replace', index=False)
+        # print(f'Your data has been uploaded to the {database_name} successfully under the {clean_orders_data_table_name} table.')
 
-        csddf = DataCleaning().clean_sales_data()
-        csddf.to_sql(name=clean_sales_data_table_name, con=engine, if_exists='replace', index=False)
-        print(f'Your data has been uploaded to the {database_name} successfully under the {clean_sales_data_table_name} table.')
+        # csddf = DataCleaning().clean_sales_data()
+        # csddf.to_sql(name=clean_sales_data_table_name, con=engine, if_exists='replace', index=False)
+        # print(f'Your data has been uploaded to the {database_name} successfully under the {clean_sales_data_table_name} table.')
 
         pass
     
     pass
 
-# print(DatabaseConnector().read_db_creds())
-# print(DatabaseConnector().list_db_tables())
 DatabaseConnector().upload_to_db()
