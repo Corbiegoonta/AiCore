@@ -1,4 +1,3 @@
-from data_cleaning import DataTransform as dt
 import pandas as pd
 
 class DataFrameInfo:
@@ -11,7 +10,7 @@ class DataFrameInfo:
         dataframe.info()
         pass
 
-    def show_statistical_df_info(self, dataframe):
+    def get_statistical_df_info(self, dataframe):
         pd.options.display.float_format = '{:.2f}'.format
         print(f"The median values for this dataframe is as follows:\n{dataframe.median()}")    
         print(f"The mean values for this dataframe is as follows:\n{dataframe.mean()}")
@@ -28,13 +27,16 @@ class DataFrameInfo:
         pass
 
     def column_null_count(self, dataframe):
+        pd.options.mode.use_inf_as_na = True
         df_showing_nulls = dataframe.isna()
         print("The count of nulls for each column is as follows:\n")
         for column in df_showing_nulls:
             print(df_showing_nulls[column].value_counts())
+        print("\n")
         print("The proportion of nulls and non_nulls for each column are as follows:\n")
         for column in df_showing_nulls:
             print(df_showing_nulls[column].value_counts(normalize=True))
-        pass
+        
+        return df_showing_nulls
 
     pass
