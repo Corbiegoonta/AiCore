@@ -15,24 +15,24 @@ def load_rds_credentials(file_path):
 class RDSDatabaseConnector:
     
     def __init__(self):
+        try:
+            self.credentials = load_rds_credentials(yaml_file_path)
 
-        self.credentials = load_rds_credentials(yaml_file_path)
+            creds = self.credentials
 
-        creds = self.credentials
+            DATABASE_TYPE = 'postgresql'
+            DBAPI = 'psycopg2'
+            HOST = creds["RDS_HOST"]
+            USER = creds["RDS_USER"]
+            PASSWORD = creds["RDS_PASSWORD"]
+            DATABASE = creds["RDS_DATABASE"]
+            PORT = 5432
 
-        DATABASE_TYPE = 'postgresql'
-        DBAPI = 'psycopg2'
-        HOST = creds["RDS_HOST"]
-        USER = creds["RDS_USER"]
-        PASSWORD = creds["RDS_PASSWORD"]
-        DATABASE = creds["RDS_DATABASE"]
-        PORT = 5432
+            self.engine_connection = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}").execution_options(isolation_level='AUTOCOMMIT').connect()
 
-        self.engine_connection = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}").execution_options(isolation_level='AUTOCOMMIT').connect()
-
-        print("Database connection has connected!")
-
-        pass
+            print("Database connection has connected!")
+        except Exception as e:
+            print(f"Error connecting to the database: {e}")
     
     def get_table_name(self):
         table_names = inspect(self.engine_connection).get_table_names()
@@ -55,7 +55,6 @@ class RDSDatabaseConnector:
 
     def load_data_from_csv(self, file_path):
         loan_payments_data = pd.read_csv(file_path)
-        # loan_payments_data.info()
         return loan_payments_data
         
     pass
